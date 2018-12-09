@@ -38,7 +38,14 @@ bool XVideoThread::Open(AVCodecParameters *para, IVideoCall *call, int width, in
 	return re;
 }
 
+bool isPause = false;
 
+void XVideoThread::SetPause(bool isPause)
+{
+	vmux.lock();
+	this->isPause = isPause;
+	vmux.unlock();
+}
 
 void XVideoThread::run()
 {
@@ -47,14 +54,21 @@ void XVideoThread::run()
 	{
 		vmux.lock();
 
+		if (isPause)
+		{
+			vmux.unlock();
+			msleep(5);
+			continue;
+		}
+
 		//音视频同步
-		if (synpts>0 && synpts < decode->pts)
+		if (synpts > 0 && synpts < decode->pts)
 		{
 			vmux.unlock();
 			msleep(1);
 			continue;
 		}
-		
+
 
 		AVPacket *pkt = Pop();
 		////没有数据
@@ -77,7 +91,7 @@ void XVideoThread::run()
 			msleep(1);
 			continue;
 		}
-		
+
 #if 0
 		//一次send 多次recv
 		while (!isExit)
@@ -101,7 +115,7 @@ void XVideoThread::run()
 			vmux.unlock();
 			continue;
 		}
-			
+
 		//显示视频
 		if (call)
 		{
@@ -109,10 +123,44 @@ void XVideoThread::run()
 		}
 		vmux.unlock();
 #endif
-	
+
 
 	}
 }
+
+bool XVideoThread::RepaintPts(AVPacket *pkt, long long seekPts)
+{
+	vmux.lock();
+	bool re = decode->Send(pkt);
+	if (!re)
+	{
+		vmux.unlock();
+		return true;		//表示结束解码
+	}
+	decode->pts = 0;
+
+	AVFrame *frame = decode->Recv();
+
+	if (!frame)
+	{
+		vmux.unlock();
+		return false;
+	}
+
+	//到达位置
+	if (decode->pts >= seekPts)
+	{
+		if (call)
+			call->Repaint(frame);
+		vmux.unlock();
+		return true;
+	}
+	XFreeFrame(&frame);	
+	vmux.unlock();
+	return false;
+}
+
+
 
 XVideoThread::XVideoThread()
 {

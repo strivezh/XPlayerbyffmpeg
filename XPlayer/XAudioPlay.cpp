@@ -27,6 +27,25 @@ public:
 			return true;
 		return false;
 	}
+
+	virtual void SetPause(bool isPause)
+	{
+		mux.lock();
+		if (!output)
+		{
+			mux.unlock();
+			return;
+		}
+		if (isPause)
+		{
+			output->suspend();
+		}
+		else
+		{
+			output->resume();
+		}
+		mux.unlock();
+	}
 	virtual bool Write(const unsigned char *data, int datasize)
 	{
 		if (!data || datasize <= 0) return false;
@@ -102,6 +121,17 @@ public:
 		mux.unlock();
 
 		return true;
+	}
+
+	virtual void Clear()
+	{
+		mux.lock();
+
+		if (io)
+		{
+			io->reset();
+		}
+		mux.unlock();
 	}
 
 };

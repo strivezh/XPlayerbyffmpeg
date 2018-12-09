@@ -32,10 +32,16 @@ public:
 	//线程退出函数
 	bool isExit = false;
 
+
+
+
+
 protected:
 	std::mutex mux;
 	//链表 存放外部传入的AVPacket  先进先出
 	std::list<AVPacket *> packs;
+
 	XDecode *decode = 0;
+
 };
 

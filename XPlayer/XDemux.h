@@ -20,6 +20,9 @@ public:
 	//空间需要调用者释放,释放AVPacket对象空间和数据空间  av_packet_free
 	virtual AVPacket *Read();
 
+	//只读视频，音频丢弃
+	virtual AVPacket *ReadVideo();
+
 	//判断 音频 or 视频
 	virtual bool IsAudio(AVPacket *pkt);
 
@@ -37,6 +40,8 @@ public:
 	virtual void Clear();
 	//关闭
 	virtual void Close();
+
+
 	XDemux();
 	virtual ~XDemux();
 
@@ -49,6 +54,8 @@ public:
 	int sampleRate = 0;
 	int channels = 0;
 
+
+
 protected:
 	std::mutex mux;
 	//解封装上下文
@@ -57,7 +64,6 @@ protected:
 	//音视频索引
 	int videoStream = 0;
 	int audioStream = 1;
-
 
 
 

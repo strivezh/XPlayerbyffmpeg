@@ -14,13 +14,17 @@ extern "C"
 
 #pragma comment(lib,"avcodec.lib")
 
-
 void XFreePakcet(AVPacket **pkt)
 {
-	if (pkt || (*pkt)) return;
+	if (!pkt || (*pkt)) return;
 	av_packet_free(pkt);
 }
 
+void XFreeFrame(AVFrame **frame)
+{
+	if (!frame || (*frame)) return;
+	av_frame_free(frame);
+}
 
 bool XDecode::Open(AVCodecParameters *para)
 {

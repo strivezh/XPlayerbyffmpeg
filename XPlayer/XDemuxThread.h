@@ -19,7 +19,24 @@ public:
 	virtual void Close();
 	void run();
 
-	bool isExit = false;
+	virtual void Seek(double pos);
+
+	
+
+	virtual void Clear();
+
+	virtual void SetPause(bool isPause);
+
+	bool isExit = false; 
+
+	long long pts = 0;
+
+	long long totalMs = 0;
+
+	bool isPause = false;
+
+
+
 
 	XDemuxThread();
 	virtual ~XDemuxThread();

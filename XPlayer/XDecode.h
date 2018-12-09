@@ -6,6 +6,7 @@ struct AVFrame;
 struct AVPacket;
 
 extern void XFreePakcet(AVPacket **pkt);
+extern void XFreeFrame(AVFrame **frame);
 
 class XDecode
 {

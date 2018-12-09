@@ -145,6 +145,37 @@ AVPacket *XDemux::Read()
 	return pkt;
  }
 
+//此处存在bug， 真的有读不到数据的情况，后移进度条没影响，但是往前移动时，就挂了
+AVPacket *XDemux::ReadVideo()
+{
+	mux.lock();
+	if (!ic)
+	{
+		mux.unlock();
+		return 0;		
+	}
+	mux.unlock();
+
+	AVPacket *pkt = NULL;
+	//防止阻塞
+	for (int i = 0; i < 20; i++)
+	{
+		pkt = Read();
+		if (!pkt)
+		{
+			break;
+		}
+		if (pkt->stream_index == videoStream)
+		{	
+			break;
+		}
+		av_packet_free(&pkt);
+	}
+
+	return pkt;
+}
+
+
 AVCodecParameters *XDemux::CopyVPara()
 {
 	mux.lock();
@@ -193,7 +224,7 @@ bool XDemux::Seek(double pos)
 	//int  ms = 3000;
 	//long long pos = (double)ms / (double)1000 * r2d(ic->streams[pkt->stream_index]->time_base);
 	
-	int ret = av_seek_frame(ic, videoStream, seekPos, AVSEEK_FLAG_BACKWARD | AVSEEK_FLAG_FRAME);\
+	int ret = av_seek_frame(ic, videoStream, seekPos, AVSEEK_FLAG_BACKWARD | AVSEEK_FLAG_FRAME);
 	mux.unlock();
 	if (ret < 0)return false;
 

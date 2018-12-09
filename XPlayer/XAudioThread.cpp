@@ -4,6 +4,16 @@
 #include <XAudioPlay.h>
 #include <XResample.h>
 
+void XAudioThread::Clear()
+{
+	XDecodeThread::Clear();
+	mux.lock();
+
+	if (ap) ap->Clear();
+
+	mux.unlock();
+}
+
 void XAudioThread::Close()
 {
 	XDecodeThread::Close();
@@ -69,7 +79,16 @@ bool XAudioThread::Open(AVCodecParameters *para, int sample_rate, int channels)
 	return re;
 }
 
-
+void XAudioThread::SetPause(bool isPause)
+{
+	//amux.lock();
+	this->isPause = isPause;
+	if (ap)
+	{
+		ap->SetPause(isPause);
+	}
+	//amux.unlock();
+}
 
 void XAudioThread::run()
 {
@@ -77,6 +96,13 @@ void XAudioThread::run()
 	while (!isExit)
 	{
 		amux.lock();
+
+		if (isPause)
+		{
+			amux.unlock();
+			msleep(5);
+			continue;
+		}
 		//if (packs.empty() || !decode || !res || !ap)
 		//{
 		//	amux.unlock();
@@ -113,7 +139,7 @@ void XAudioThread::run()
 			{
 				if (size <= 0) break;
 				//»º³åÎ´²¥Íê ¿Õ¼ä²»¹»
-				if (ap->GetFree() < size)
+				if (ap->GetFree() < size || isPause)
 				{
 					msleep(1);
 					continue;

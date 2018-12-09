@@ -4,14 +4,102 @@
 #include "XVideoThread.h"
 #include "XAudioThread.h"
 
+#include "XDecode.h"
 #include <iostream>
 
+extern "C"
+{
+#include <libavformat/avformat.h>
+}
+#pragma comment(lib,"avformat.lib")
+
+void XDemuxThread::SetPause(bool isPause)
+{
+	mux.lock();
+	this->isPause = isPause;
+	if (at) at->SetPause(isPause);
+	if (vt) vt->SetPause(isPause);
+	mux.unlock();
+}
+
+void XDemuxThread::Clear()
+{
+	mux.lock();
+	if (demux) demux->Clear();
+	if (vt) vt->Clear();
+	if (at) at->Clear();
+	mux.unlock();
+
+
+}
+
+ void XDemuxThread::Seek(double pos)
+{
+	 //清缓存
+	 Clear();
+	 mux.lock();
+	 bool states = this->isPause;
+	 mux.unlock();
+
+	 //先暂停
+	 SetPause(true);
+
+	 mux.lock();
+	 if (demux)
+		 demux->Seek(pos);
+	 //实际要显示的位置
+	 long long seekPts = pos * demux->totalMs;
+
+	 while (!isExit)
+	 {
+		 AVPacket *pkt = demux->ReadVideo();
+		 if (!pkt) continue;
+
+		 //如果解码到seekPts
+		 if (vt->RepaintPts(pkt, seekPts))
+		 {
+			 this->pts = seekPts;
+			 break;
+		 }
+		
+		 ////视频数据 解码
+		 //bool re = vt->decode->Send(pkt);
+
+		 //if (!re) break;
+		 //AVFrame *frame = vt->decode->Recv();
+
+		 //if (!frame) continue;
+		 ////到达位置 显示
+		 //if (frame->pts >= seekPts)
+		 //{
+			// this->pts = frame->pts;
+			// vt->call->Repaint(frame);
+			// break;
+		 //}
+		 ////没到位置 释放
+		 //av_frame_free(&frame);
+	 }
+	 mux.unlock();
+
+	 //Seek时非暂停状态
+	  if (!states)
+		 SetPause(false);
+}
 
 void XDemuxThread::run()
 {
 	while (!isExit)
 	{
+		
 		mux.lock();
+
+		if (isPause)
+		{
+			mux.unlock();
+			msleep(5);
+			continue;
+		}
+
 		if (!demux)
 		{
 			//没有创建好，等待一会
@@ -23,6 +111,7 @@ void XDemuxThread::run()
 		//音视频同步 把音频pts时间 传入视频中，视频中在做同步
 		if (vt && at)
 		{
+			pts = at->pts;
 			vt->synpts = at->pts;
 		}
 
@@ -87,6 +176,8 @@ bool XDemuxThread::Open(const char *url, IVideoCall *call)
 		std::cout << "at->Open failed" << std::endl;
 	}
 
+	//打开视频时，为进度条显示赋值 总时长
+	totalMs = demux->totalMs;
 	mux.unlock();
 
 	std::cout << "XDemux Open return " << re << std::endl;

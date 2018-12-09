@@ -123,6 +123,7 @@
     <ClCompile Include="XDemuxThread.cpp" />
     <ClCompile Include="XPlayer.cpp" />
     <ClCompile Include="XResample.cpp" />
+    <ClCompile Include="XSlider.cpp" />
     <ClCompile Include="XVideoThread.cpp" />
     <ClCompile Include="XVideoWidget.cpp" />
   </ItemGroup>
@@ -144,6 +145,12 @@
     <ClInclude Include="XDemux.h" />
     <ClInclude Include="XDemuxThread.h" />
     <ClInclude Include="XResample.h" />
+    <QtMoc Include="XSlider.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\Debug;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtOpenGLExtensions;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtMultimedia</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_WIDGETS_LIB;QT_MULTIMEDIA_LIB</Define>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\Debug;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtOpenGLExtensions;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtMultimedia</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_WIDGETS_LIB;QT_MULTIMEDIA_LIB</Define>
+    </QtMoc>
     <ClInclude Include="XVideoThread.h" />
     <QtMoc Include="XVideoWidget.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\Debug;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtOpenGLExtensions;$(QTDIR)\include\QtWidgets</IncludePath>
